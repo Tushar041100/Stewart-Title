@@ -1,7 +1,10 @@
-import openai
+from openai import OpenAI
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
  
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
  
 REQUIRED_SECTIONS = [
     "Policy Start Date", "Schedule A", "Legal Description", "Proposed Insured"
@@ -43,8 +46,8 @@ def query_llm_for_missing_fields(text_snippet):
     \"\"\"{text_snippet[:3000]}\"\"\"
     """
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}

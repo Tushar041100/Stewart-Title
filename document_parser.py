@@ -3,9 +3,12 @@ import textract
 import docx
 import pandas as pd
 from PyPDF2 import PdfReader
-import openai
- 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
  
 def summarize_content(text):
     prompt = f"""
@@ -15,8 +18,8 @@ def summarize_content(text):
     prompt += text[:3000]  # limit tokens for safety
  
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}

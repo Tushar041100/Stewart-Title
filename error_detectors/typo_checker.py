@@ -1,10 +1,13 @@
 import language_tool_python
-import openai
+from openai import OpenAI
 import os
 import time
 from language_tool_python.utils import RateLimitError
+from dotenv import load_dotenv
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def enhance_typos_with_llm(text):
     prompt = f"""
@@ -14,8 +17,8 @@ def enhance_typos_with_llm(text):
     "{text[:1500]}"
     """
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}

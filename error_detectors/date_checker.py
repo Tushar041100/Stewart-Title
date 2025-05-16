@@ -1,9 +1,12 @@
 import re
 from dateutil.parser import parse as parse_date, ParserError
-import openai
+from openai import OpenAI
 import os
- 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from dotenv import load_dotenv
+
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
  
 def check_dates(text, doc_name):
     date_pattern = re.compile(r"\b\d{1,4}[-/\.\s]\d{1,2}[-/\.\s]\d{1,4}\b")
@@ -52,8 +55,8 @@ def check_dates(text, doc_name):
 def evaluate_date_logic_with_llm(date_list):
     prompt = f"Given these dates from an insurance document, do you see any logical inconsistencies?\n{date_list}"
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}

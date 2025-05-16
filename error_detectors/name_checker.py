@@ -1,11 +1,14 @@
 import re
 from collections import defaultdict
 from difflib import SequenceMatcher
-import openai
+from openai import OpenAI
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
  
-openai.api_key = os.getenv("OPENAI_API_KEY")
-print("OpenAI API Key:", os.getenv("OPENAI_API_KEY")) 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 def check_names(text, doc_name):
     name_pattern = re.compile(r"\b([A-Z][a-z]+\s[A-Z][a-z]+)\b")
     found_names = name_pattern.findall(text)
@@ -31,8 +34,8 @@ def check_names(text, doc_name):
 def query_llm_name_variance(name_set):
     prompt = f"Are the following names potentially referring to the same person or entity? Suggest a consistent name if so:\n{name_set}"
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}

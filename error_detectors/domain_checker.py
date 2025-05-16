@@ -1,8 +1,11 @@
 import re
 import os
-import openai
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
  
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
  
 def query_llm_for_terminology(text_snippet):
     prompt = f"""
@@ -13,8 +16,8 @@ def query_llm_for_terminology(text_snippet):
     "{text_snippet}"
     """
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}
