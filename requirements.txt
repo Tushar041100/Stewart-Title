@@ -1,0 +1,12 @@
+streamlit
+pandas
+openpyxl
+python-docx
+PyPDF2
+language-tool-python
+python-dateutil
+fuzzywuzzy
+textract==1.6.3
+python-Levenshtein
+openai
+python-dotenv
