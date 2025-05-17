@@ -5,19 +5,41 @@ import pandas as pd
 from PyPDF2 import PdfReader
 from utils.groq_client import query_groq
  
-def summarize_content(text):
-    prompt = f"""
-    Summarize the following insurance document text in one paragraph for context-aware processing:
- 
-    """
-    prompt += text[:3000]  # limit tokens for safety
- 
+def summarize_content(text, chunk_size=1000, overlap=100):
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunk = text[start:end]
+        chunks.append(chunk)
+        start += chunk_size - overlap
+
+    # Summarize each chunk
+    summaries = []
+    for idx, chunk in enumerate(chunks):
+        print(f"Summarizing chunk {idx + 1}/{len(chunks)}...")
+
+        prompt = f"""
+        Summarize the following insurance document text in one paragraph for context-aware processing:
+    
+        """
+        prompt += chunk  # limit tokens for safety
+    
+        try:
+            summary = query_groq(prompt)
+            summaries.append(summary)
+        except Exception:
+            print(f"Error summarizing chunk {idx + 1}: {e}")
+            summaries.append("")
+    combined_summary_text = "\n".join(summaries)
+    final_prompt = f"Combine the following summaries into a cohesive summary:\n\n{combined_summary_text}"
     try:
-        response = query_groq(prompt)
-        print("LLM Response:", response) ##Note
-        return response
-    except Exception:
-        return "Summary unavailable due to API error."
+        final_summary = query_groq(final_prompt)
+    except Exception as e:
+        print(f"Error generating final summary: {e}")
+        final_summary = combined_summary_text  # Fallback to combined summaries
+
+    return final_summary
  
 def parse_documents(file_path):
     text = ""

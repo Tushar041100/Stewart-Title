@@ -3,7 +3,7 @@ import time
 from language_tool_python.utils import RateLimitError
 from utils.groq_client import query_groq
 
-def enhance_typos_with_llm_in_chunks(text, chunk_size=1500):
+def enhance_typos_with_llm_in_chunks(text, chunk_size=1000):
     """
     Splits the text into smaller chunks and checks each chunk for spelling, grammar, and punctuation issues using LLM.
     """

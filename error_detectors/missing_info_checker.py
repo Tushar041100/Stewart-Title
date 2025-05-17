@@ -32,7 +32,7 @@ def check_missing_info(text, doc_name):
     return errors
  
 def query_llm_for_missing_fields_in_chunks(text):
-    chunk_size = 3000
+    chunk_size = 1000
     chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
     feedback = []
 
