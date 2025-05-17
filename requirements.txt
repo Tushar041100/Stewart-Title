@@ -8,5 +8,5 @@ python-dateutil
 fuzzywuzzy
 textract==1.6.3
 python-Levenshtein
-openai
 python-dotenv
+requests

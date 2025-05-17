@@ -1,13 +1,6 @@
 import re
 from collections import defaultdict
-from difflib import SequenceMatcher
-from openai import OpenAI
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
- 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from utils.groq_client import query_groq
 
 def check_names(text, doc_name):
     name_pattern = re.compile(r"\b([A-Z][a-z]+\s[A-Z][a-z]+)\b")
@@ -34,15 +27,8 @@ def check_names(text, doc_name):
 def query_llm_name_variance(name_set):
     prompt = f"Are the following names potentially referring to the same person or entity? Suggest a consistent name if so:\n{name_set}"
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.2
-        )
+        response = query_groq(prompt)
         print("LLM Response:", response) ##Note
-        return response['choices'][0]['message']['content']
+        return response
     except Exception:
         return "Could not resolve name variation via LLM."

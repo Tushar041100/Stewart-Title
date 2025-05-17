@@ -1,33 +1,32 @@
 import language_tool_python
-from openai import OpenAI
-import os
 import time
 from language_tool_python.utils import RateLimitError
-from dotenv import load_dotenv
+from utils.groq_client import query_groq
 
-load_dotenv()
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-def enhance_typos_with_llm(text):
-    prompt = f"""
-    Check the following text for spelling, grammar, and punctuation issues in a title insurance document. List each error and the corrected version.
-
-    Text:
-    "{text[:1500]}"
+def enhance_typos_with_llm_in_chunks(text, chunk_size=1500):
     """
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.2
-        )
-        return response['choices'][0]['message']['content'].strip()
-    except Exception as e:
-        return f"LLM enhancement unavailable. Error: {str(e)}"
+    Splits the text into smaller chunks and checks each chunk for spelling, grammar, and punctuation issues using LLM.
+    """
+    chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
+    feedback = []
+
+    for chunk in chunks:
+        prompt = f"""
+        Check the following text for spelling, grammar, and punctuation issues in a title insurance document. List each error and the corrected version.
+
+        Text:
+        \"\"\"{chunk}\"\"\"
+        """
+        try:
+            response = query_groq(prompt)
+            print("LLM Response:", response)  # Debugging
+            if response and "No issues" not in response:
+                feedback.append(response)
+        except Exception as e:
+            feedback.append(f"LLM error: {e}")
+
+    # Combine feedback from all chunks
+    return " | ".join(feedback) if feedback else "No issues"
 
 def check_typos_in_chunks(text, tool, chunk_size=5000, max_retries=3):
     """
@@ -75,7 +74,7 @@ def check_typos(text, doc_name):
             "Suggestion": ", ".join(m.replacements) if m.replacements else "-"
         })
 
-    llm_feedback = enhance_typos_with_llm(text)
+    llm_feedback = enhance_typos_with_llm_in_chunks(text)
     if llm_feedback and "No issues" not in llm_feedback:
         errors.append({
             "Document": doc_name,

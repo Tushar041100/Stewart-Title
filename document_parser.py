@@ -1,14 +1,9 @@
-import os
 import textract
 import docx
+import os
 import pandas as pd
 from PyPDF2 import PdfReader
-from openai import OpenAI
-from dotenv import load_dotenv
-
-load_dotenv()
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from utils.groq_client import query_groq
  
 def summarize_content(text):
     prompt = f"""
@@ -18,15 +13,9 @@ def summarize_content(text):
     prompt += text[:3000]  # limit tokens for safety
  
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3
-        )
-        return response["choices"][0]["message"]["content"].strip()
+        response = query_groq(prompt)
+        print("LLM Response:", response) ##Note
+        return response
     except Exception:
         return "Summary unavailable due to API error."
  
